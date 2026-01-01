@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Lost Item | Digital Lost & Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="/js/utils.js"></script>
+    <!-- Placeholder or real API key should be maintained in env, for frontend we usually inject it -->
+    <!-- Assuming user provides key or we use a fallback if not provided -->
+</head>
+
+<body class="bg-gray-100 font-[Inter] py-8">
+
+    <div class="container mx-auto px-6 max-w-2xl">
+        <a href="/citizen/dashboard.html" class="text-gray-500 hover:text-gray-700 mb-4 inline-block">← Back to
+            Dashboard</a>
+
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <h1 class="text-2xl font-bold text-blue-900 mb-6">Report Lost Item</h1>
+
+            <form id="reportForm" class="space-y-6">
+                <!-- Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Item Name</label>
+                        <input type="text" name="name"
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. iPhone 13, Wallet" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
+                        <select name="category"
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="electronics">Electronics</option>
+                            <option value="documents">Documents (ID, Passport)</option>
+                            <option value="wallet">Wallet / Purse</option>
+                            <option value="bag">Bag / Luggage</option>
+                            <option value="vehicle">Vehicle</option>
+                            <option value="jewelry">Jewelry</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Description</label>
+                    <textarea name="description" rows="3"
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Color, brand, distinguishing marks..." required></textarea>
+                </div>
+
+                <!-- Images -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Upload Images</label>
+                    <input type="file" name="images" multiple
+                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="text-xs text-gray-500 mt-1">Found images help police verify ownership.</p>
+                </div>
+
+                <!-- Map -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Location of Loss (Select on Map)</label>
+                    <div id="map"
+                        class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 relative">
+                        <span id="map-msg">Loading Map... (If API key is missing, enter coords manually)</span>
+                    </div>
+                    <div class="mt-2 grid grid-cols-2 gap-4">
+                        <input type="text" id="lat" name="location_lat"
+                            class="w-full px-4 py-2 border rounded-lg bg-gray-50" placeholder="Latitude" readonly>
+                        <input type="text" id="lng" name="location_lng"
+                            class="w-full px-4 py-2 border rounded-lg bg-gray-50" placeholder="Longitude" readonly>
+                    </div>
+                    <input type="text" name="region_details"
+                        class="w-full mt-2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Additional location details (e.g. Near Central Station)">
+                </div>
+
+                <div id="message" class="text-center hidden"></div>
+
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-bold shadow-md">Submit
+                    Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google Maps Script -->
+    <!-- We try to load it. If it fails, users can rely on manual input or we default to a central location. -->
+    <script>
+        // Check local storage or env for key if we had a dynamic way, hardcoded for now or placeholder
+        // For this task, I'll assume usage of the user's provided key if updated in code, or a placeholder.
+        // I will add a script that tries to init map.
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_Sx8LXvaLUMDjMFdwuyc3-HaUVlkPXzI&callback=initMap"></script>
+
+    <script>
+        checkAuth();
+
+        let map, marker;
+        function initMap() {
+            // Default to India Center roughly
+            const india = { lat: 20.5937, lng: 78.9629 };
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 5,
+                center: india,
+            });
+
+            // On click, add marker
+            map.addListener("click", (e) => {
+                placeMarkerAndPanTo(e.latLng);
+            });
+        }
+
+        function placeMarkerAndPanTo(latLng) {
+            if (marker) {
+                marker.setPosition(latLng);
+            } else {
+                marker = new google.maps.Marker({
+                    position: latLng,
+                    map: map,
+                });
+            }
+            map.panTo(latLng);
+            document.getElementById('lat').value = latLng.lat();
+            document.getElementById('lng').value = latLng.lng();
+        }
+
+        // Handle Form Submit
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const formData = new FormData(e.target);
+            const messageDiv = document.getElementById('message');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const response = await fetch('/api/items/lost', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }, // FormData sets Content-Type content automatically
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = 'Report submitted successfully!';
+                    messageDiv.className = 'text-green-600 text-center font-bold mb-4';
+                    messageDiv.classList.remove('hidden');
+                    setTimeout(() => window.location.href = '/citizen/dashboard.html', 1500);
+                } else {
+                    messageDiv.textContent = data.message || 'Error submitting report';
+                    messageDiv.className = 'text-red-600 text-center font-bold mb-4';
+                    messageDiv.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Report';
+                }
+            } catch (error) {
+                console.error(error);
+                messageDiv.textContent = 'Server error. Please try again.';
+                messageDiv.className = 'text-red-600 text-center font-bold mb-4';
+                messageDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Report';
+            }
+        });
+    </script>
+</body>
+
+</html>

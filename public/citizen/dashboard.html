@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Dashboard | GovRecover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/js/utils.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: { brand: { 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-slate-900 text-white hidden md:flex flex-col flex-shrink-0 transition-all duration-300">
+            <div class="p-6 flex items-center space-x-3 border-b border-gray-800">
+                <div class="bg-brand-500 p-1.5 rounded-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <span class="font-bold text-lg tracking-wide">GovRecover</span>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#"
+                    class="flex items-center space-x-3 px-4 py-3 bg-brand-600/20 text-brand-400 border-r-2 border-brand-500 rounded-l-lg">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    <span class="font-medium">My Reports</span>
+                </a>
+                <a href="/citizen/report.html"
+                    class="flex items-center space-x-3 px-4 py-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-lg transition">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="font-medium">File New Report</span>
+                </a>
+                <button onclick="logout()"
+                    class="w-full flex items-center space-x-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition mt-8">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="font-medium">Sign Out</span>
+                </button>
+            </nav>
+
+            <div class="p-6 border-t border-gray-800">
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                        <span id="userInitials">U</span>
+                    </div>
+                    <div>
+                        <p class="text-white text-sm font-semibold" id="userName">User</p>
+                        <p class="text-gray-500 text-xs">Citizen Account</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <!-- Mobile Header -->
+            <div class="md:hidden flex justify-between items-center mb-6">
+                <span class="font-bold text-xl text-brand-900">GovRecover</span>
+                <button onclick="logout()" class="text-sm text-red-600 font-semibold">Logout</button>
+            </div>
+
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                    <p class="text-gray-500 mt-1">Track the status of your reported items.</p>
+                </div>
+                <a href="/citizen/report.html"
+                    class="mt-4 md:mt-0 bg-brand-600 hover:bg-brand-500 text-white px-6 py-3 rounded-xl shadow-lg shadow-brand-500/30 font-semibold flex items-center transition transform hover:-translate-y-0.5">
+                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Report Item
+                </a>
+            </header>
+
+            <!-- Stats/Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <svg class="w-24 h-24 text-brand-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-medium">Total Reports</p>
+                    <h3 class="text-4xl font-bold text-gray-800 mt-2" id="totalReports">0</h3>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <svg class="w-24 h-24 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-medium">Active Cases</p>
+                    <h3 class="text-4xl font-bold text-gray-800 mt-2" id="activeCases">0</h3>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <svg class="w-24 h-24 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-medium">Resolved</p>
+                    <h3 class="text-4xl font-bold text-gray-800 mt-2" id="resolvedCases">0</h3>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Recent Activity</h2>
+
+            <!-- Cards Grid -->
+            <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
+                <!-- Data injection here -->
+                <div class="col-span-3 flex flex-col items-center justify-center py-20 text-gray-400">
+                    <svg class="w-16 h-16 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <p>Fetching your records...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const token = checkAuth();
+        const user = JSON.parse(localStorage.getItem('user'));
+        document.getElementById('userName').textContent = user ? user.name : 'Citizen';
+        if (user && user.name) document.getElementById('userInitials').textContent = user.name.charAt(0).toUpperCase();
+
+        async function fetchReports() {
+            try {
+                const response = await fetch('/api/items/my-lost', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const items = await response.json();
+                const grid = document.getElementById('reportsGrid');
+
+                // Update Stats
+                document.getElementById('totalReports').innerText = items.length;
+                document.getElementById('activeCases').innerText = items.filter(i => ['submitted', 'under_review'].includes(i.status)).length;
+                document.getElementById('resolvedCases').innerText = items.filter(i => ['found', 'collected'].includes(i.status)).length;
+
+                grid.innerHTML = '';
+
+                if (items.length === 0) {
+                    grid.innerHTML = '<div class="col-span-3 text-center py-20"><p class="text-gray-500 text-lg">No reports submitted yet.</p><a href="/citizen/report.html" class="text-brand-600 font-semibold mt-2 inline-block">File your first report &rarr;</a></div>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    // Badge styles
+                    let badgeClass = 'bg-gray-100 text-gray-600';
+                    let statusLabel = item.status.replace('_', ' ').toUpperCase();
+                    if (item.status === 'under_review') badgeClass = 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-600/20';
+                    if (item.status === 'found') badgeClass = 'bg-green-100 text-green-700 ring-1 ring-green-600/20';
+                    if (item.status === 'collected') badgeClass = 'bg-blue-100 text-blue-700 ring-1 ring-blue-600/20';
+
+                    const imageHtml = item.images && item.images.length > 0
+                        ? `<div class="h-48 w-full bg-cover bg-center" style="background-image: url('${item.images[0]}')"></div>`
+                        : `<div class="h-48 w-full bg-gray-100 flex items-center justify-center text-gray-400"><svg class="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>`;
+
+                    const card = `
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                            ${imageHtml}
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass} status-badge">
+                                        ${statusLabel}
+                                    </span>
+                                    <span class="text-xs text-gray-400 font-medium">${new Date(item.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-1">${item.name}</h3>
+                                <p class="text-gray-500 text-sm line-clamp-2 mb-4">${item.description}</p>
+                                
+                                <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-50">
+                                    <span class="flex items-center">
+                                       <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                       ${item.location_lat ? 'Lat: ' + Number(item.location_lat).toFixed(4) : 'Unknown Loc'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += card;
+                });
+            } catch (error) {
+                console.error('Error fetching reports:', error);
+            }
+        }
+        fetchReports();
+    </script>
+</body>
+
+</html>

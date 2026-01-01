@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Police Dashboard | GovRecover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/js/utils.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: { brand: { 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e', 950: '#082f49' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+
+        .tab-btn {
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: #e0f2fe;
+            /* blue-100 */
+            color: #0284c7;
+            /* blue-600 */
+            border-bottom: 2px solid #0284c7;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Navbar -->
+    <nav class="bg-brand-950 text-white shadow-lg z-50">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-1.5 rounded-lg border border-white/20">
+                    <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-wide block leading-none">GovRecover</span>
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Police
+                        Terminal</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-6">
+                <span
+                    class="bg-brand-900 border border-brand-700 text-xs px-3 py-1 rounded-full text-brand-300 font-mono"
+                    id="stationName">STATION_ID</span>
+                <button onclick="logout()"
+                    class="text-sm font-semibold text-gray-400 hover:text-white transition flex items-center">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="flex-1 container mx-auto px-6 py-6 overflow-hidden flex flex-col">
+
+        <!-- Header & Controls -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <div class="flex space-x-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
+                <button onclick="switchTab('lostItems')" id="tab-lost"
+                    class="tab-btn active px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg> Lost Reports
+                </button>
+                <button onclick="switchTab('foundReport')" id="tab-found"
+                    class="tab-btn px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg> Log Found Item
+                </button>
+                <button onclick="switchTab('foundInventory')" id="tab-inventory"
+                    class="tab-btn px-6 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg> Inventory
+                </button>
+            </div>
+            <!-- Search (Visual Only) -->
+            <div class="relative mt-4 md:mt-0 w-full md:w-64">
+                <input type="text" placeholder="Search Case ID..."
+                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Section: Lost Items Feed (Grid/Table) -->
+        <div id="lostItemsSection" class="flex-1 overflow-auto bg-white rounded-xl shadow-lg border border-gray-200">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th
+                            class="px-6 py-4 border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Item Details</th>
+                        <th
+                            class="px-6 py-4 border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Category</th>
+                        <th
+                            class="px-6 py-4 border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Reporter Info</th>
+                        <th
+                            class="px-6 py-4 border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Date Filed</th>
+                        <th
+                            class="px-6 py-4 border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Status</th>
+                        <th
+                            class="px-6 py-4 border-b border-gray-100 bg-gray-50 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="lostTableBody" class="divide-y divide-gray-100">
+                    <!-- Items injected here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section: Report Found Item -->
+        <div id="foundReportSection"
+            class="hidden flex-1 overflow-auto bg-white rounded-xl shadow-lg border border-gray-200 p-8 flex justify-center">
+            <div class="w-full max-w-2xl">
+                <div class="text-center mb-10">
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Log Found Property</h2>
+                    <p class="text-gray-500">Enter details of item found or handed over to station.</p>
+                </div>
+
+                <form id="foundForm" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 text-xs font-bold uppercase mb-2">Category</label>
+                            <select name="category"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                                <option value="electronics">Electronics</option>
+                                <option value="documents">Documents</option>
+                                <option value="wallet">Wallet</option>
+                                <option value="bag">Bag</option>
+                                <option value="vehicle">Vehicle</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-xs font-bold uppercase mb-2">Location (Lat,
+                                Lng)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" name="location_lat"
+                                    class="w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500"
+                                    placeholder="Lat" required>
+                                <input type="text" name="location_lng"
+                                    class="w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500"
+                                    placeholder="Lng" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-bold uppercase mb-2">Description</label>
+                        <textarea name="description" rows="3"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500"
+                            required placeholder="Color, brand, distinguishing marks..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-xs font-bold uppercase mb-2">Evidence Photo</label>
+                        <div
+                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer relative">
+                            <input type="file" name="images"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                                viewBox="0 0 48 48">
+                                <path
+                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="mt-1 text-sm text-gray-600">Click to upload or drag and drop</p>
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-brand-600 text-white py-3 rounded-xl hover:bg-brand-500 transition font-bold shadow-lg shadow-brand-500/30">Submit
+                        Found Entry</button>
+                    <div id="foundMessage" class="mt-4 hidden text-center font-semibold"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Section: Inventory (Placeholder UI) -->
+        <div id="foundInventorySection"
+            class="hidden flex-1 overflow-auto bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="text-center py-20">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Inventory Empty</h3>
+                <p class="text-gray-500 mt-2">No items currently held in station custody.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        const token = checkAuth();
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (localStorage.getItem('role') !== 'police') window.location.href = '/citizen/login.html';
+        document.getElementById('stationName').textContent = user ? user.station : 'HQ';
+
+        function switchTab(tab) {
+            // Hide all
+            document.getElementById('lostItemsSection').classList.add('hidden');
+            document.getElementById('foundReportSection').classList.add('hidden');
+            document.getElementById('foundInventorySection').classList.add('hidden');
+
+            // Deactivate buttons
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active', 'bg-brand-50', 'text-brand-600', 'border-b-2', 'border-brand-600');
+                b.classList.add('text-gray-600');
+            });
+
+            // Show active
+            const activeSec = tab === 'lostItems' ? 'lostItemsSection' : (tab === 'foundReport' ? 'foundReportSection' : 'foundInventorySection');
+            document.getElementById(activeSec).classList.remove('hidden');
+
+            // Activate button
+            const activeBtn = tab === 'lostItems' ? 'tab-lost' : (tab === 'foundReport' ? 'tab-found' : 'tab-inventory');
+            const btnEl = document.getElementById(activeBtn);
+            btnEl.classList.add('active'); // CSS class handles the rest
+
+            if (tab === 'lostItems') fetchLostItems();
+        }
+
+        async function fetchLostItems() {
+            try {
+                const response = await fetch('/api/items/all-lost', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const items = await response.json();
+                const tbody = document.getElementById('lostTableBody');
+                tbody.innerHTML = '';
+
+                items.forEach(item => {
+                    const row = `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-gray-100 overflow-hidden">
+                                        ${item.images && item.images.length > 0 ? `<img class="h-full w-full object-cover" src="${item.images[0]}" />` : ''}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-bold text-gray-900">${item.name}</div>
+                                        <div class="text-xs text-gray-500 truncate w-32">${item.description}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 border-b border-gray-100 text-sm text-gray-700 font-medium">${item.category}</td>
+                            <td class="px-6 py-4 border-b border-gray-100">
+                                <div class="text-sm text-gray-900 font-medium">${item.reporter_name}</div>
+                                <div class="text-xs text-gray-500">${item.reporter_phone}</div>
+                            </td>
+                            <td class="px-6 py-4 border-b border-gray-100 text-sm text-gray-500">${new Date(item.created_at).toLocaleDateString()}</td>
+                            <td class="px-6 py-4 border-b border-gray-100">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.status === 'found' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+                                    ${item.status.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 border-b border-gray-100 text-center">
+                                ${item.status !== 'found' ?
+                            `<button onclick="openMatchModal(${item.id})" class="text-brand-600 hover:text-brand-800 font-bold text-sm bg-brand-50 px-3 py-1.5 rounded-lg border border-brand-200 hover:bg-brand-100 transition">Match</button>`
+                            : '<span class="text-green-600 font-bold text-sm flex justify-center items-center"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Done</span>'}
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (error) { console.error(error); }
+        }
+
+        // Handle Found Form
+        document.getElementById('foundForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/api/items/found', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                if (response.ok) {
+                    alert('Item Logged Successfully');
+                    e.target.reset();
+                    switchTab('lostItems');
+                } else {
+                    alert('Error logging item');
+                }
+            } catch (error) { console.error(error); }
+        });
+
+        // Initial Load
+        fetchLostItems();
+
+        function openMatchModal(lostItemId) {
+            const foundItemId = prompt("Enter Found Item ID to Match:");
+            if (foundItemId) matchItem(lostItemId, foundItemId);
+        }
+
+        async function matchItem(lostId, foundId) {
+            try {
+                const response = await fetch('/api/items/match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ lostItemId: lostId, foundItemId: foundId })
+                });
+                const result = await response.json();
+                alert(result.message);
+                fetchLostItems();
+            } catch (error) { alert('Matching failed'); }
+        }
+    </script>
+</body>
+
+</html>
