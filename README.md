@@ -76,8 +76,8 @@ Built with a "Security-First" & "Performance-First" architecture:
 ##  Default Credentials (Vadodara Region)
 
 **Police Administrator:**
-*   **Email:** `dakshdubey1008@gmail.com`
-*   **Password:** `@nImesh12`
+*   **Email:** ``
+*   **Password:** ``
 
 *(Note: You can create new officers via the hidden route `/police/signup.html`)*
 
