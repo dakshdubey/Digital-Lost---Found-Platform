@@ -14,7 +14,7 @@
     "government",
     "platform"
   ],
-  "author": "Antigravity",
+  "author": "Daksha Dubey",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
